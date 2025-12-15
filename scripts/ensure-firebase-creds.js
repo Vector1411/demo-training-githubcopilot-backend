@@ -16,6 +16,7 @@ const candidates = [
 ];
 
 function findCandidate(dir) {
+  // check given dir first
   for (const name of candidates) {
     const p = path.join(dir, name);
     if (fs.existsSync(p)) return p;
@@ -28,6 +29,27 @@ function findCandidate(dir) {
       if (fs.existsSync(p)) return p;
     }
   }
+
+  // try parent directory (one level up) to support storing creds outside repo
+  const parent = path.resolve(dir, '..');
+  if (parent && parent !== dir) {
+    for (const name of candidates) {
+      const p = path.join(parent, name);
+      if (fs.existsSync(p)) return p;
+    }
+    try {
+      const pfiles = fs.readdirSync(parent);
+      for (const f of pfiles) {
+        if (/service.*account.*\.json/i.test(f) || /firebase.*admin.*\.json/i.test(f)) {
+          const p = path.join(parent, f);
+          if (fs.existsSync(p)) return p;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
   return null;
 }
 
