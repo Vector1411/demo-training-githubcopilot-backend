@@ -5,6 +5,17 @@
  *   it will attempt to list root collections (admin.firestore().listCollections()).
  */
 const admin = require('firebase-admin');
+const fs = require('fs');
+const path = require('path');
+// Load local env if present so GOOGLE_APPLICATION_CREDENTIALS or FIREBASE_* get set
+const localEnv = path.resolve(process.cwd(), '.env.local');
+if (fs.existsSync(localEnv)) {
+  try {
+    require('dotenv').config({ path: localEnv });
+  } catch (e) {
+    // ignore
+  }
+}
 
 async function run() {
   try {
